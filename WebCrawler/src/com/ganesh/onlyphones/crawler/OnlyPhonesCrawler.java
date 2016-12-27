@@ -1,3 +1,5 @@
+package com.ganesh.onlyphones.crawler;
+
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -5,6 +7,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.ganesh.onlyphones.model.CurrentStatus;
+import com.ganesh.onlyphones.util.ParseUtility;
 
 /**
  * @author shriganesh

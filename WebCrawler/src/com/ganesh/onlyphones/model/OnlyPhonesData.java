@@ -1,4 +1,4 @@
-
+package com.ganesh.onlyphones.model;
 /**
  * @author shriganesh
  *

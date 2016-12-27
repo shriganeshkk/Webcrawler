@@ -1,3 +1,5 @@
+package com.ganesh.onlyphones.util;
+
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -6,6 +8,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.ganesh.onlyphones.model.CurrentStatus;
+import com.ganesh.onlyphones.model.OnlyPhonesData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -134,7 +138,7 @@ public class ParseUtility {
 		return data;
 	}
 
-	protected CurrentStatus iterateOverModelsList(String website, String brand, Elements phoneModelsList,
+	public CurrentStatus iterateOverModelsList(String website, String brand, Elements phoneModelsList,
 			CurrentStatus currentStatus) throws IOException {
 		CurrentStatus tempStatus = currentStatus;
 		Gson gson = new GsonBuilder().create();
