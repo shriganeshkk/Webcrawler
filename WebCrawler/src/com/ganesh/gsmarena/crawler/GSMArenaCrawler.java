@@ -27,6 +27,7 @@ public class GSMArenaCrawler {
 
 			// parsing path from div id body--> div "sidebar col left" --> div
 			// "brandmenu-v2 light l-box clearfix" --> 2nd element which is list
+			
 			Elements initial = fullPage.select("div#body");
 			Elements brandList = initial.first().children().get(1).children().first().child(1).children();
 			for (Element el : brandList) {

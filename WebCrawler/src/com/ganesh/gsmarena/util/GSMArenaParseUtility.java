@@ -32,8 +32,31 @@ public class GSMArenaParseUtility {
 		Elements nodes=null;
 		
 		for (Element table : attributeList) {
+			
+			//Extract Technology
+			if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("network")){
+				nodes= table.children().first().children();
+				for (Element element : nodes) {
+					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("network"))
+						data.setTechnology(element.children().get(2).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("2G bands"))
+						data.setTwoGBands(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("3G bands"))
+						data.setThreeGBands(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("4G bands"))
+						data.setFourGBands(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Speed"))
+						data.setNetworkSpeed(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("GPRS"))
+						data.setGprs(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("EDGE"))
+						data.setEdge(element.children().get(1).text());
+				}
+				
+			}
+			
 			// Extract launch details
-			if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("launch")){
+			else if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("launch")){
 				nodes= table.children().first().children();
 				for (Element element : nodes) {
 					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("launch"))
@@ -47,22 +70,34 @@ public class GSMArenaParseUtility {
 				nodes= table.children().first().children();
 				for (Element element : nodes) {
 					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("body"))
-						data.setDimensions(element.children().get(2).text().contains("(") ? element.children().get(2).text().substring(0, element.children().get(2).text().indexOf("(")):element.children().get(2).text());
+						data.setDimensions(element.children().get(2).text());
 					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Weight"))
-						data.setWeight(element.children().get(1).text().toLowerCase().contains("(")?element.children().get(1).text().substring(0,element.children().get(1).text().indexOf("(")) : element.children().get(1).text());
+						data.setWeight(element.children().get(1).text().toLowerCase());
 					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("SIM"))
-						data.setSimType(element.children().get(1).text().toLowerCase().contains("dual")? "dual" : "single");
+						data.setSimType(element.children().get(1).text());
+					else{
+						//TODO how to handle <br> 
+						System.out.println(element.children().get(1).text().replaceAll("<br>", "|"));
+						data.setBodyAdditionalFeature(element.children().get(1).text());
+					}
 				}
 			}
 			//Extract display
 			else if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("DISPLAY")){
 				nodes= table.children().first().children();
 				for (Element element : nodes) {
-					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("size")){
-						data.setDisplaySize(element.children().get(1).text().contains("(") ? element.children().get(1).text().substring(0, element.children().get(1).text().indexOf("(")):element.children().get(1).text());
-					}
+					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("size"))
+						data.setDisplaySize(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("type"))
+						data.setDisplayType(element.children().get(1).text());
 					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Resolution"))
-						data.setResolution(element.children().get(1).text().contains("(") ? element.children().get(1).text().substring(0, element.children().get(1).text().indexOf("(")):element.children().get(1).text());
+						data.setResolution(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Multitouch"))
+						data.setMultiTouch(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Protection"))
+						data.setMultiTouch(element.children().get(1).text());
+					else
+						data.setDisplayAdditionalFeature(element.children().get(1).text());
 				}
 			}
 			//Extract Platform
@@ -74,25 +109,25 @@ public class GSMArenaParseUtility {
 					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Chipset"))
 						data.setChipset(element.children().get(1).text());
 					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("CPU")){
-						boolean diffCores=false;
-						diffCores = element.children().get(1).text().contains("(") ?  true : false;
-						
-						String [] temp=element.children().get(1).text().split(" ");
-						//Extracting clock speed first
-						for (int i = 0; i < temp.length; i++) {
-							if(temp[i].equalsIgnoreCase("GHz")){
-								data.setClockSpeed(temp[i-1]+" "+ temp[i]);
-								break;
-							}
-							else if(temp[i].endsWith("core"))
-								data.setCores(temp[i].replaceAll("-", " "));
-						}
-						
-						//After extracting clock speed whatever is left must be CPU
-						String cpu = diffCores == false ? element.children().get(1).text().replaceAll(data.getClockSpeed(), "").trim().replaceAll(" +", " ") : element.children().get(1).text();
-						if(diffCores)
-							data.setClockSpeed("");
-						data.setProcessor(cpu);
+//						boolean diffCores=false;
+//						diffCores = element.children().get(1).text().contains("(") ?  true : false;
+//						
+//						String [] temp=element.children().get(1).text().split(" ");
+//						//Extracting clock speed first
+//						for (int i = 0; i < temp.length; i++) {
+//							if(temp[i].equalsIgnoreCase("GHz")){
+//								data.setClockSpeed(temp[i-1]+" "+ temp[i]);
+//								break;
+//							}
+//							else if(temp[i].endsWith("core"))
+//								data.setCores(temp[i].replaceAll("-", " "));
+//						}
+//						
+//						//After extracting clock speed whatever is left must be CPU
+//						String cpu = diffCores == false ? element.children().get(1).text().replaceAll(data.getClockSpeed(), "").trim().replaceAll(" +", " ") : element.children().get(1).text();
+//						if(diffCores)
+//							data.setClockSpeed("");
+						data.setProcessor(element.children().get(1).text());
 					}
 					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("GPU"))
 						data.setGpu(element.children().get(1).text());
@@ -103,17 +138,19 @@ public class GSMArenaParseUtility {
 				nodes= table.children().first().children();
 				for (Element element : nodes) {
 					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("memory")){
-						if(element.children().get(2).text().contains(",")){
-							String [] temp=element.children().get(2).text().split(",");
-							for (int i = 0; i < temp.length; i++) {
-								if(temp[i].contains("GB"))
-									data.setExternalMemory(splitAndReturnBasedon(temp[i],"GB"));
-							}
-						}
-						else
-							data.setExternalMemory(element.children().get(2).text());
+						data.setExternalMemory(element.children().get(2).text());
+//						if(element.children().get(2).text().contains(",")){
+//							String [] temp=element.children().get(2).text().split(",");
+//							for (int i = 0; i < temp.length; i++) {
+//								if(temp[i].contains("GB"))
+//									data.setExternalMemory(splitAndReturnBasedon(temp[i],"GB"));
+//							}
+//						}
+//						else
+//							data.setExternalMemory(element.children().get(2).text());
 					}
 					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Internal")){
+						data.setInternalMemory(element.children().get(1).text());
 						String [] temp=element.children().get(1).text().split(",");
 						for (int i = 0; i < temp.length; i++) {
 							if(temp[i].contains("RAM"))
@@ -134,34 +171,80 @@ public class GSMArenaParseUtility {
 			else if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("Camera")){
 				nodes= table.children().first().children();
 				for (Element element : nodes) {
-					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Camera")){
-						String [] tokens= element.children().get(2).text().split(",");
-						for (int i = 0; i < tokens.length; i++) {
-							if(tokens[i].endsWith("MP"))
-								data.setPrimaryCamera(tokens[i]);
-						}
-					}
-					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Secondary")){
-						String [] tokens= element.children().get(1).text().split(",");
-						for (int i = 0; i < tokens.length; i++) {
-							if(tokens[i].endsWith("MP"))
-								data.setSecondaryCamera(tokens[i]);
-						}
-					}
+					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Camera"))
+						data.setPrimaryCamera(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Secondary"))
+						data.setSecondaryCamera(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Features"))
+						data.setCameraFeatures(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Video"))
+						data.setVideo(element.children().get(1).text());
 				}
 			}
+			//Extract Sound
+			else if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("SOUND")){
+				nodes= table.children().first().children();
+				for (Element element : nodes) {
+					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("SOUND"))
+						data.setAlertTypes(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Loudspeaker"))
+						data.setLoudSpeaker(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("3.5mm jack"))
+						data.setAudioJack(element.children().get(1).text());
+					else 
+						data.setSoundAdditionalFeature(element.children().get(1).text());
+				}
+			}
+			//Extract Communication
+			else if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("COMMS")){
+				nodes= table.children().first().children();
+				for (Element element : nodes) {
+					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("COMMS"))
+						data.setWlan(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Bluetooth"))
+						data.setBluetooth(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("GPS"))
+						data.setGps(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("NFC"))
+						data.setNFC(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Radio"))
+						data.setRadio(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("USB"))
+						data.setUSB(element.children().get(1).text());
+				}
+				
+			}
+			
+			//Extract additional Features
+			else if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("FEATURES")){
+				nodes= table.children().first().children();
+				for (Element element : nodes) {
+					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("FEATURES"))
+						data.setSensors(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Messaging"))
+						data.setMessaging(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Browser"))
+						data.setBrowser(element.children().get(1).text());
+					else if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Java"))
+						data.setJava(element.children().get(1).text());
+					else 
+						data.setGeneralAdditionalFeature(element.children().get(1).text());
+				}
+			}
+			
 			//Extract Battery capacity
 			else if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("BATTERY")){
-				nodes= table.children().first().children();
-				Element e=nodes.first();
-				data.setBatterCapacity(splitAndReturnBasedon(e.text(),"mAh"));
+				data.setBatterCapacity(table.children().first().children().first().text());
+//				nodes= table.children().first().children();
+//				Element e=nodes.first();
+//				data.setBatterCapacity(splitAndReturnBasedon(e.text(),"mAh"));
 			}
 			//Extract colors
 			else if(table.childNodeSize()> 1 && table.children().first().children().first().children().first().text().equalsIgnoreCase("Misc")){
 				nodes= table.children().first().children();
 				for (Element element : nodes) {
 					if(null!=element.children().get(0).text() && element.children().get(0).text().equalsIgnoreCase("Misc"))
-						data.setColors(element.children().get(2).text().split(","));
+						data.setColors(element.children().get(2).text().replaceAll(" and", " , ").split(","));
 				}
 			}
 		}
